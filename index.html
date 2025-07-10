@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator Website</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .calculator {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 15px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h1>Value Calculator</h1>
+        <input type="number" id="userInput" placeholder="Enter a number" step="any">
+        
+        <div class="buttons">
+            <button onclick="calculate('mult 1')">mult 1</button>
+            <button onclick="calculate('mult 2')">mult 2</button>
+            <button onclick="calculate('mult 3')">mult 3</button>
+            <button onclick="calculate('mult 4')">mult 4</button>
+            <button onclick="calculate('mult 5')">mult 5</button>
+            <button onclick="calculate('mult 6')">mult 6</button>
+        </div>
+        
+        <div class="result" id="result">
+            Result will appear here
+        </div>
+    </div>
+
+    <script>
+        function calculate(operation) {
+            const input = document.getElementById('userInput').value;
+            const result = document.getElementById('result');
+            
+            if (input === '') {
+                result.textContent = 'Please enter a number';
+                return;
+            }
+            
+            const num = parseFloat(input);
+            let calculation;
+            
+            switch(operation) {
+                case 'mult 1':
+                    calculation = num * num;
+                    result.textContent = `${num}² = ${calculation}`;
+                    break;
+                case 'mult 2':
+                    calculation = num * num * num;
+                    result.textContent = `${num}³ = ${calculation}`;
+                    break;
+                case 'mult 3':
+                    if (num < 0) {
+                        result.textContent = 'Cannot calculate square root of negative number';
+                        return;
+                    }
+                    calculation = Math.sqrt(num);
+                    result.textContent = `√${num} = ${calculation.toFixed(4)}`;
+                    break;
+                case 'mult 4':
+                    calculation = num * 2;
+                    result.textContent = `${num} × 2 = ${calculation}`;
+                    break;
+                case 'mult 5':
+                    calculation = num / 2;
+                    result.textContent = `${num} ÷ 2 = ${calculation}`;
+                    break;
+                case 'mult 6':
+                    if (num < 0 || !Number.isInteger(num)) {
+                        result.textContent = 'Factorial only works with non-negative integers';
+                        return;
+                    }
+                    calculation = factorial(num);
+                    result.textContent = `${num}! = ${calculation}`;
+                    break;
+            }
+        }
+        
+        function factorial(n) {
+            if (n === 0 || n === 1) return 1;
+            let result = 1;
+            for (let i = 2; i <= n; i++) {
+                result *= i;
+            }
+            return result;
+        }
+        
+        // Allow Enter key to trigger calculation
+        document.getElementById('userInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                calculate('square'); // Default to square calculation
+            }
+        });
+    </script>
+</body>
+</html>
