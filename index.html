@@ -1,141 +1,135 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculator Website</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .calculator {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        input[type="number"] {
-            width: 100%;
-            padding: 15px;
-            font-size: 18px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-        .buttons {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        button {
-            padding: 15px;
-            font-size: 16px;
-            border: none;
-            border-radius: 5px;
-            background-color: #007bff;
-            color: white;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .result {
-            padding: 15px;
-            background-color: #e9ecef;
-            border-radius: 5px;
-            font-size: 18px;
-            font-weight: bold;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SEZ Impact Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    label {
+      display: block;
+      margin: 15px 0 5px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    .output {
+      margin-top: 20px;
+      padding: 15px;
+      background: #e8f5e9;
+      border-left: 5px solid #4caf50;
+    }
+    .output div {
+      margin: 10px 0;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
 </head>
 <body>
-    <div class="calculator">
-        <h1>Value Calculator</h1>
-        <input type="number" id="userInput" placeholder="Enter a number" step="any">
-        
-        <div class="buttons">
-            <button onclick="calculate('mult 1')">mult 1</button>
-            <button onclick="calculate('mult 2')">mult 2</button>
-            <button onclick="calculate('mult 3')">mult 3</button>
-            <button onclick="calculate('mult 4')">mult 4</button>
-            <button onclick="calculate('mult 5')">mult 5</button>
-            <button onclick="calculate('mult 6')">mult 6</button>
-        </div>
-        
-        <div class="result" id="result">
-            Result will appear here
-        </div>
-    </div>
+  <div class="container">
+    <h1>SEZ Impact Calculator</h1>
 
-    <script>
-        function calculate(operation) {
-            const input = document.getElementById('userInput').value;
-            const result = document.getElementById('result');
-            
-            if (input === '') {
-                result.textContent = 'Please enter a number';
-                return;
-            }
-            
-            const num = parseFloat(input);
-            let calculation;
-            
-            switch(operation) {
-                case 'mult 1':
-                    calculation = num * num;
-                    result.textContent = `${num}² = ${calculation}`;
-                    break;
-                case 'mult 2':
-                    calculation = num * num * num;
-                    result.textContent = `${num}³ = ${calculation}`;
-                    break;
-                case 'mult 3':
-                    if (num < 0) {
-                        result.textContent = 'Cannot calculate square root of negative number';
-                        return;
-                    }
-                    calculation = Math.sqrt(num);
-                    result.textContent = `√${num} = ${calculation.toFixed(4)}`;
-                    break;
-                case 'mult 4':
-                    calculation = num * 2;
-                    result.textContent = `${num} × 2 = ${calculation}`;
-                    break;
-                case 'mult 5':
-                    calculation = num / 2;
-                    result.textContent = `${num} ÷ 2 = ${calculation}`;
-                    break;
-                case 'mult 6':
-                    if (num < 0 || !Number.isInteger(num)) {
-                        result.textContent = 'Factorial only works with non-negative integers';
-                        return;
-                    }
-                    calculation = factorial(num);
-                    result.textContent = `${num}! = ${calculation}`;
-                    break;
-            }
-        }
-        
-        function factorial(n) {
-            if (n === 0 || n === 1) return 1;
-            let result = 1;
-            for (let i = 2; i <= n; i++) {
-                result *= i;
-            }
-            return result;
-        }
-        
-        // Allow Enter key to trigger calculation
-        document.getElementById('userInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                calculate('square'); // Default to square calculation
-            }
-        });
-    </script>
+    <!-- list all SEZ -->
+    <label for="sez">Select SEZ</label>
+    <select id="sez">
+      <option value="COEGA">COEGA</option>
+      <option value="Dube">Dube</option>
+      <option value="RBIDZ">RBIDZ</option>
+      <!-- will add more SEZ later -- todo -->
+    </select>
+
+    <!-- user input -->
+    <label for="expenditure">Expenditure Increase (R)</label>
+    <input type="number" id="expenditure" placeholder="Enter value in Rands" />
+
+    <!-- calculate button -->
+    <button onclick="calculate()">Calculate Impact</button>
+
+    <!-- outputs -->
+    <div class="output" id="output" style="display:none">
+      <div><strong>Change in SEZ Investment:</strong> <span id="investment"></span></div>
+      <div><strong>Change in Jobs:</strong> <span id="jobs"></span></div>
+      <div><strong>Change in Corporate IT (R):</strong> <span id="cit"></span></div>
+      <div><strong>Change in Personal IT (R):</strong> <span id="pit"></span></div>
+    </div>
+  </div>
+
+  <script>
+    // temp values, will update to pull from google app script at later date -- todo
+    const ratios = {
+      COEGA: {
+        investment: 3.231631,
+        jobs: 0.000002589,
+        cit: 0.5801098564,
+        pit: 0.8439563170
+      },
+      Dube: {
+        investment: 0.674340528,
+        jobs: 0.000001071,
+        cit: 0.1431185528,
+        pit: 0.2515368836
+      },
+      RBIDZ: {
+        investment: 0.832099181,
+        jobs: 0.000000313,
+        cit: 0.0147601617,
+        pit: 0.0048003881
+      }
+    };
+
+    // format value to ZAR
+    function formatCurrency(num) {
+      return parseFloat(num).toLocaleString('en-ZA', { style: 'currency', currency: 'ZAR' });
+    }
+
+    function calculate() {
+      const sez = document.getElementById("sez").value;
+      const expenditure = parseFloat(document.getElementById("expenditure").value);
+      const data = ratios[sez];
+
+      if (!data || isNaN(expenditure)){
+        return;
+      } 
+      
+      document.getElementById("investment").textContent = formatCurrency(expenditure * data.investment);
+      document.getElementById("jobs").textContent = (expenditure * data.jobs).toFixed(2);
+      document.getElementById("cit").textContent = formatCurrency(expenditure * data.cit);
+      document.getElementById("pit").textContent = formatCurrency(expenditure * data.pit);
+
+      document.getElementById("output").style.display = "block";
+    }
+  </script>
 </body>
 </html>
