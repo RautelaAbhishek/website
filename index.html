@@ -61,73 +61,188 @@
   <div class="container">
     <h1>SEZ Impact Calculator</h1>
 
-    <!-- list all SEZ -->
     <label for="sez">Select SEZ</label>
     <select id="sez">
       <option value="COEGA">COEGA</option>
       <option value="Dube">Dube</option>
       <option value="RBIDZ">RBIDZ</option>
-      <!-- will add more SEZ later -- todo -->
+      <option value="ELIDZ">ELIDZ</option>
+      <option value="Maluti">Maluti</option>
+      <option value="GIDZ">GIDZ</option>
+      <option value="TASEZ">TASEZ</option>
+      <option value="FPSEZ">FPSEZ</option>
+      <option value="Atlantis">Atlantis</option>
     </select>
 
-    <!-- user input -->
     <label for="expenditure">Expenditure Increase (R)</label>
     <input type="number" id="expenditure" placeholder="Enter value in Rands" />
 
-    <!-- calculate button -->
     <button onclick="calculate()">Calculate Impact</button>
 
-    <!-- outputs -->
     <div class="output" id="output" style="display:none">
-      <div><strong>Change in SEZ Investment:</strong> <span id="investment"></span></div>
+      <div><strong>Change in SEZ Core Income (R):</strong> <span id="income"></span></div>
+      <div><strong>Change in SEZ Investment (R):</strong> <span id="investment"></span></div>
       <div><strong>Change in Jobs:</strong> <span id="jobs"></span></div>
       <div><strong>Change in Corporate IT (R):</strong> <span id="cit"></span></div>
       <div><strong>Change in Personal IT (R):</strong> <span id="pit"></span></div>
+      <div><strong>Change in SEZ Tenant Rates (R):</strong> <span id="rates"></span></div>
+      <div><strong>Total Revenue Impact (R):</strong> <span id="revenue"></span></div>
+      <div><strong>Cost of 12R to the state (R):</strong> <span id="cost12r"></span></div>
+      <div><strong>Change in ETI cost to the state (R):</strong> <span id="etichange"></span></div>
+      <div><strong>Total Expenditure (R):</strong> <span id="totalexp"></span></div>
+      <div><strong>Net Effect of Government Spending (R):</strong> <span id="neteffect"></span></div>
     </div>
   </div>
 
   <script>
-    // temp values, will update to pull from google app script at later date -- todo
-    const ratios = {
+    // Raw data from Excel will be changed to app script at later date. this is just for a draft.
+    const sezData = {
       COEGA: {
-        investment: 3.231631,
-        jobs: 0.000002589,
-        cit: 0.5801098564,
-        pit: 0.8439563170
+        totalExpenditure: 3868015408,   // H2
+        investment: 12500000000,        // J2
+        jobs: 10015,                    // E2
+        corporateTax: 2243873863,       // Q2
+        personalTax: 3264436038,        // S2
+        sezIncome: 350000000,           // L2
+        tenantRates: 2047408311,        // N2
+        section12R: 160023562,          // U2
+        eti: 7344000                    // W2
       },
       Dube: {
-        investment: 0.674340528,
-        jobs: 0.000001071,
-        cit: 0.1431185528,
-        pit: 0.2515368836
+        totalExpenditure: 4893669983,
+        investment: 3300000000,
+        jobs: 5242,
+        corporateTax: 700374966,
+        personalTax: 1230938497,
+        sezIncome: 144600000,
+        tenantRates: 37643882,
+        section12R: 44825442,
+        eti: 3762000
       },
       RBIDZ: {
-        investment: 0.832099181,
-        jobs: 0.000000313,
-        cit: 0.0147601617,
-        pit: 0.0048003881
+        totalExpenditure: 4867208253,
+        investment: 4050000000,
+        jobs: 1525,
+        corporateTax: 71840781,
+        personalTax: 23364489,
+        sezIncome: 32000000,
+        tenantRates: 45192387,
+        section12R: 12181330,
+        eti: 864000
+      },
+      ELIDZ: {
+        totalExpenditure: 1590959366,
+        investment: 5800000000,
+        jobs: 5138,
+        corporateTax: 1228760015,
+        personalTax: 1403677914,
+        sezIncome: 403000000,
+        tenantRates: 840264000,
+        section12R: 58056434,
+        eti: 3627000
+      },
+      Maluti: {
+        totalExpenditure: 246792648,
+        investment: 1020000000,
+        jobs: 434,
+        corporateTax: 106575110,
+        personalTax: 41703240,
+        sezIncome: 0,
+        tenantRates: 79471859,
+        section12R: 3707487,
+        eti: 279000
+      },
+      GIDZ: {
+        totalExpenditure: 1103297000,
+        investment: 1300000000,
+        jobs: 2734,
+        corporateTax: 208383379,
+        personalTax: 473969810,
+        sezIncome: 64300000,
+        tenantRates: 10233021,
+        section12R: 0,
+        eti: 0
+      },
+      TASEZ: {
+        totalExpenditure: 5091095000,
+        investment: 5600000000,
+        jobs: 3422,
+        corporateTax: 21736789,
+        personalTax: 338553949,
+        sezIncome: 574000000,
+        tenantRates: 82746417,
+        section12R: 0,
+        eti: 0
+      },
+      FPSEZ: {
+        totalExpenditure: 227822000,
+        investment: 260000000,
+        jobs: 853,
+        corporateTax: 2264785,
+        personalTax: 317675886,
+        sezIncome: 2500000,
+        tenantRates: 24415923,
+        section12R: 0,
+        eti: 0
+      },
+      Atlantis: {
+        totalExpenditure: 2028494342,
+        investment: 815000000,
+        jobs: 709,
+        corporateTax: 1069065,
+        personalTax: 47067556,
+        sezIncome: 1260000,
+        tenantRates: 945744,
+        section12R: 0,
+        eti: 0
       }
     };
 
-    // format value to ZAR
     function formatCurrency(num) {
       return parseFloat(num).toLocaleString('en-ZA', { style: 'currency', currency: 'ZAR' });
     }
 
     function calculate() {
+      // Get user inputs
       const sez = document.getElementById("sez").value;
       const expenditure = parseFloat(document.getElementById("expenditure").value);
-      const data = ratios[sez];
+      const data = sezData[sez];
 
-      if (!data || isNaN(expenditure)){
+      // Validate inputs
+      if (!data || isNaN(expenditure)) {
+        alert("Please select an SEZ and enter a valid expenditure amount");
         return;
-      } 
-      
-      document.getElementById("investment").textContent = formatCurrency(expenditure * data.investment);
-      document.getElementById("jobs").textContent = (expenditure * data.jobs).toFixed(2);
-      document.getElementById("cit").textContent = formatCurrency(expenditure * data.cit);
-      document.getElementById("pit").textContent = formatCurrency(expenditure * data.pit);
+      }
 
+      // Calculations
+      const income = (expenditure * data.sezIncome) / data.totalExpenditure;
+      const investment = (expenditure * data.investment) / data.totalExpenditure;
+      const jobs = (expenditure * data.jobs) / data.totalExpenditure;
+      const cit = (expenditure * data.corporateTax) / data.totalExpenditure;
+      const pit = (expenditure * data.personalTax) / data.totalExpenditure;
+      const rates = (expenditure * data.tenantRates) / data.totalExpenditure;
+      const cost12r = (expenditure * data.section12R) / data.totalExpenditure;
+      const etichange = (expenditure * data.eti) / data.totalExpenditure;
+      
+      // totals
+      const revenue = cit + pit + rates;  
+      const totalexp = expenditure + cost12r + etichange;  
+      const neteffect = revenue - totalexp;  
+
+      // show results
+      document.getElementById("income").textContent = formatCurrency(income);
+      document.getElementById("investment").textContent = formatCurrency(investment);
+      document.getElementById("jobs").textContent = jobs.toFixed(2);
+      document.getElementById("cit").textContent = formatCurrency(cit);
+      document.getElementById("pit").textContent = formatCurrency(pit);
+      document.getElementById("rates").textContent = formatCurrency(rates);
+      document.getElementById("revenue").textContent = formatCurrency(revenue);
+      document.getElementById("cost12r").textContent = formatCurrency(cost12r);
+      document.getElementById("etichange").textContent = formatCurrency(etichange);
+      document.getElementById("totalexp").textContent = formatCurrency(totalexp);
+      document.getElementById("neteffect").textContent = formatCurrency(neteffect);
+
+      // Make output visable
       document.getElementById("output").style.display = "block";
     }
   </script>
