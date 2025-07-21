@@ -4,109 +4,190 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SEZ Impact Calculator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f2f2f2;
+      font-family: 'Poppins', Arial, sans-serif;
+      background: #fff;
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      color: #181818;
     }
     .container {
-      max-width: 800px;
-      margin: auto;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      max-width: 700px;
+      margin: 40px auto;
+      background: #181818;
+      padding: 36px 28px 28px 28px;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+      border: 1px solid #222;
     }
     h1 {
       text-align: center;
-      color: #2c3e50;
+      color: #ff8800;
+      font-size: 1.7rem;
+      margin-bottom: 24px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
     }
-    label {
-      display: block;
-      margin: 15px 0 5px;
-      font-weight: bold;
+    .calculator-flex {
+      display: flex;
+      gap: 36px;
+      align-items: flex-start;
+      justify-content: space-between;
     }
-    input, select {
+    .inputs {
+      flex: 1 1 0;
+      min-width: 220px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .inputs label {
       width: 100%;
-      padding: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
+      max-width: 340px;
+      margin: 14px 0 6px;
+      font-weight: 500;
+      color: #fff;
+      font-size: 1.05rem;
+    }
+    .inputs select,
+    .inputs input,
+    .inputs button {
+      width: 100%;
+      max-width: 340px;
+      box-sizing: border-box;
     }
     .output {
-      margin-top: 20px;
-      padding: 15px;
-      background: #e8f5e9;
-      border-left: 5px solid #4caf50;
+      flex: 1 1 0;
+      margin-top: 0;
+      padding: 20px 16px;
+      background: #222;
+      border-radius: 14px;
+      border-left: 4px solid #ff8800;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      font-size: 1.05rem;
+      min-width: 220px;
+      max-width: 340px;
     }
-    .output div {
-      margin: 10px 0;
+    input, select {
+      padding: 12px 14px;
+      border-radius: 8px;
+      border: 1px solid #ff8800;
+      background: #181818;
+      font-size: 1.08rem;
+      margin-bottom: 14px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      color: #fff;
+    }
+    input:focus, select:focus {
+      border-color: #ff8800;
+      box-shadow: 0 2px 8px rgba(255,136,0,0.09);
+      outline: none;
     }
     button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      background-color: #4caf50;
-      color: white;
+      padding: 14px;
+      background: #ff8800;
+      color: #fff;
       border: none;
-      border-radius: 5px;
+      border-radius: 8px;
+      font-size: 1.13rem;
+      font-weight: 600;
       cursor: pointer;
+      margin-top: 10px;
+      box-shadow: 0 2px 8px rgba(255,136,0,0.07);
+      transition: background 0.2s, transform 0.15s;
     }
-    button:hover {
-      background-color: #45a049;
+    button:hover, button:focus {
+      background: #fff;
+      color: #181818;
+      transform: translateY(-2px) scale(1.03);
+      outline: none;
+    }
+    .output div {
+      margin: 12px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #444;
+      padding-bottom: 8px;
+      font-size: 1.04rem;
+      color: #fff;
+    }
+    .output div:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .output span {
+      font-weight: 600;
+      color: #ff8800;
+      font-size: 1.07rem;
+    }
+    @media (max-width: 700px) {
+      .container {
+        max-width: 98vw;
+        padding: 12px 4vw;
+      }
+      .calculator-flex {
+        flex-direction: column;
+        gap: 0;
+      }
+      .output {
+        margin-top: 18px;
+        max-width: 100%;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>SEZ Impact Calculator</h1>
-
-    <label for="sez">Select SEZ</label>
-    <select id="sez">
-      <option value="COEGA">COEGA</option>
-      <option value="Dube">Dube</option>
-      <option value="RBIDZ">RBIDZ</option>
-      <option value="ELIDZ">ELIDZ</option>
-      <option value="Maluti">Maluti</option>
-      <option value="GIDZ">GIDZ</option>
-      <option value="TASEZ">TASEZ</option>
-      <option value="FPSEZ">FPSEZ</option>
-      <option value="Atlantis">Atlantis</option>
-    </select>
-
-    <label for="expenditure">Expenditure Increase (R)</label>
-    <input type="number" id="expenditure" placeholder="Enter value in Rands" />
-
-    <button onclick="calculate()">Calculate Impact</button>
-
-    <div class="output" id="output" style="display:none">
-      <div><strong>Change in SEZ Core Income (R):</strong> <span id="income"></span></div>
-      <div><strong>Change in SEZ Investment (R):</strong> <span id="investment"></span></div>
-      <div><strong>Change in Jobs:</strong> <span id="jobs"></span></div>
-      <div><strong>Change in Corporate IT (R):</strong> <span id="cit"></span></div>
-      <div><strong>Change in Personal IT (R):</strong> <span id="pit"></span></div>
-      <div><strong>Change in SEZ Tenant Rates (R):</strong> <span id="rates"></span></div>
-      <div><strong>Total Revenue Impact (R):</strong> <span id="revenue"></span></div>
-      <div><strong>Cost of 12R to the state (R):</strong> <span id="cost12r"></span></div>
-      <div><strong>Change in ETI cost to the state (R):</strong> <span id="etichange"></span></div>
-      <div><strong>Total Expenditure (R):</strong> <span id="totalexp"></span></div>
-      <div><strong>Net Effect of Government Spending (R):</strong> <span id="neteffect"></span></div>
+    <div class="calculator-flex">
+      <div class="inputs">
+        <label for="sez">Select SEZ</label>
+        <select id="sez">
+          <option value="COEGA">COEGA</option>
+          <option value="Dube">Dube</option>
+          <option value="RBIDZ">RBIDZ</option>
+          <option value="ELIDZ">ELIDZ</option>
+          <option value="Maluti">Maluti</option>
+          <option value="GIDZ">GIDZ</option>
+          <option value="TASEZ">TASEZ</option>
+          <option value="FPSEZ">FPSEZ</option>
+          <option value="Atlantis">Atlantis</option>
+        </select>
+        <label for="expenditure">Expenditure Increase (R)</label>
+        <input type="number" id="expenditure" placeholder="Enter value in Rands" />
+        <button onclick="calculate()">Calculate Impact</button>
+      </div>
+      <div class="output" id="output" style="display:none">
+        <div><strong>SEZ Core Income:</strong> <span id="income"></span></div>
+        <div><strong>SEZ Investment:</strong> <span id="investment"></span></div>
+        <div><strong>Jobs:</strong> <span id="jobs"></span></div>
+        <div><strong>Corporate IT:</strong> <span id="cit"></span></div>
+        <div><strong>Personal IT:</strong> <span id="pit"></span></div>
+        <div><strong>Tenant Rates:</strong> <span id="rates"></span></div>
+        <div><strong>Total Revenue:</strong> <span id="revenue"></span></div>
+        <div><strong>12R Cost to State:</strong> <span id="cost12r"></span></div>
+        <div><strong>ETI Cost to State:</strong> <span id="etichange"></span></div>
+        <div><strong>Total Expenditure:</strong> <span id="totalexp"></span></div>
+        <div><strong>Net Effect of Gov Spending:</strong> <span id="neteffect"></span></div>
+      </div>
     </div>
   </div>
-
   <script>
-    // Raw data from Excel will be changed to app script at later date. this is just for a draft.
     const sezData = {
       COEGA: {
-        totalExpenditure: 3868015408,   // H2
-        investment: 12500000000,        // J2
-        jobs: 10015,                    // E2
-        corporateTax: 2243873863,       // Q2
-        personalTax: 3264436038,        // S2
-        sezIncome: 350000000,           // L2
-        tenantRates: 2047408311,        // N2
-        section12R: 160023562,          // U2
-        eti: 7344000                    // W2
+        totalExpenditure: 3868015408,
+        investment: 12500000000,
+        jobs: 10015,
+        corporateTax: 2243873863,
+        personalTax: 3264436038,
+        sezIncome: 350000000,
+        tenantRates: 2047408311,
+        section12R: 160023562,
+        eti: 7344000
       },
       Dube: {
         totalExpenditure: 4893669983,
@@ -203,18 +284,15 @@
     }
 
     function calculate() {
-      // Get user inputs
       const sez = document.getElementById("sez").value;
       const expenditure = parseFloat(document.getElementById("expenditure").value);
       const data = sezData[sez];
 
-      // Validate inputs
       if (!data || isNaN(expenditure)) {
         alert("Please select an SEZ and enter a valid expenditure amount");
         return;
       }
 
-      // Calculations
       const income = (expenditure * data.sezIncome) / data.totalExpenditure;
       const investment = (expenditure * data.investment) / data.totalExpenditure;
       const jobs = (expenditure * data.jobs) / data.totalExpenditure;
@@ -223,13 +301,11 @@
       const rates = (expenditure * data.tenantRates) / data.totalExpenditure;
       const cost12r = (expenditure * data.section12R) / data.totalExpenditure;
       const etichange = (expenditure * data.eti) / data.totalExpenditure;
-      
-      // totals
-      const revenue = cit + pit + rates;  
-      const totalexp = expenditure + cost12r + etichange;  
-      const neteffect = revenue - totalexp;  
 
-      // show results
+      const revenue = cit + pit + rates;
+      const totalexp = expenditure + cost12r + etichange;
+      const neteffect = revenue - totalexp;
+
       document.getElementById("income").textContent = formatCurrency(income);
       document.getElementById("investment").textContent = formatCurrency(investment);
       document.getElementById("jobs").textContent = jobs.toFixed(2);
@@ -242,7 +318,6 @@
       document.getElementById("totalexp").textContent = formatCurrency(totalexp);
       document.getElementById("neteffect").textContent = formatCurrency(neteffect);
 
-      // Make output visable
       document.getElementById("output").style.display = "block";
     }
   </script>
