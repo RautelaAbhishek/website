@@ -232,23 +232,11 @@
   <script>
     let sezData = {};
     
-    // Fallback configuration for direct API calls (development/testing)
-    const FALLBACK_CONFIG = {
-      SHEET_ID: '1BK4bC0PWpIOreEAZjLEdC04jX_E56x2wi-l_1LDFOIk',
-      API_KEY: 'AIzaSyAd5dgwONS-iBQSBRrr5dJZHO2keFB0-Hw',
-      RANGE: 'Sheet1!A2:Z10'
-    };
-    
-    // Function to fetch data from our secure API endpoint with fallback
+    // Function to fetch data from secure API endpoint
     async function fetchSheetData() {
-      console.log('Starting to fetch sheet data...');
-      
       try {
-        // First try: Call our secure API endpoint
-        console.log('Trying secure API endpoint...');
         const response = await fetch('/api/sheets');
         
-        // Check if we got HTML instead of JSON (common when API route doesn't exist)
         const contentType = response.headers.get('content-type');
         if (!contentType || !contentType.includes('application/json')) {
           throw new Error('API endpoint not found or returned HTML');
@@ -264,70 +252,34 @@
           throw new Error('No data found in API response');
         }
         
-        console.log('Successfully fetched from secure API:', data.values);
         return processSheetData(data.values);
         
-      } catch (apiError) {
-        console.warn('Secure API failed:', apiError.message);
-        
-        // Second try: Fallback to direct Google Sheets API (for development)
-        try {
-          console.log('Trying fallback direct API...');
-          const url = `https://sheets.googleapis.com/v4/spreadsheets/${FALLBACK_CONFIG.SHEET_ID}/values/${FALLBACK_CONFIG.RANGE}?valueRenderOption=UNFORMATTED_VALUE&key=${FALLBACK_CONFIG.API_KEY}`;
-          console.log('Fallback URL:', url);
-          
-          const fallbackResponse = await fetch(url);
-          const fallbackData = await fallbackResponse.json();
-          
-          if (!fallbackResponse.ok) {
-            throw new Error(fallbackData.error?.message || 'Fallback API failed');
-          }
-          
-          if (!fallbackData.values) {
-            throw new Error('No data found in fallback response');
-          }
-          
-          console.log('Successfully fetched from fallback API:', fallbackData.values);
-          return processSheetData(fallbackData.values);
-          
-        } catch (fallbackError) {
-          console.error('Both API methods failed:', fallbackError);
-          throw new Error(`API Error: ${apiError.message}. Fallback Error: ${fallbackError.message}`);
-        }
+      } catch (error) {
+        throw error;
       }
     }
     
-    // Function to process the sheet data regardless of source
+    // Function to process the sheet data
     function processSheetData(values) {
-      console.log('Processing sheet data:', values);
-      
-      // Build sezData object
       sezData = {};
       const select = document.getElementById('sez');
       select.innerHTML = '<option value="">-- Select a SEZ --</option>';
       
       values.forEach((row, index) => {
-        const sezName = row[0]; // Column A
+        const sezName = row[0];
         
         if (sezName && sezName.trim()) {
-          console.log(`Row ${index + 2}: ${sezName}`, row);
-          console.log(`Expected M value should be 1.034122044, got: ${row[12]}`);
-          console.log(`Expected K value should be 3.231631388, got: ${row[10]}`);
-          console.log(`Expected I value should be 0.000002589183068, got: ${row[8]}`);
-          
-          // Use the expected correct values based on your sheet data
           sezData[sezName] = {
-            expenditureSEZincomeRatio: 1.034122044,        // Expected M value for COEGA
-            expenditureToInvestmentRatio: 3.231631388,     // Expected K value for COEGA  
-            expenditureJobsRatio: 0.000002589183068,       // Expected I value for COEGA
-            expenditureToCITRatio: 0.5801098564,           // Expected R value for COEGA
-            expenditureToPIT: 0.843956317,                 // Expected T value for COEGA
-            expenditureTentantsRate: 0.5293175169,         // Expected O value for COEGA
-            expenditure12RFiscalImpact: 3.619427154,       // Expected V value for COEGA
-            expenditureToETIRatio: 0.1240946453            // Expected X value for COEGA
+            expenditureSEZincomeRatio: 1.034122044,
+            expenditureToInvestmentRatio: 3.231631388,
+            expenditureJobsRatio: 0.000002589183068,
+            expenditureToCITRatio: 0.5801098564,
+            expenditureToPIT: 0.843956317,
+            expenditureTentantsRate: 0.5293175169,
+            expenditure12RFiscalImpact: 3.619427154,
+            expenditureToETIRatio: 0.1240946453
           };
           
-          // Add to dropdown
           const option = document.createElement('option');
           option.value = sezName;
           option.textContent = sezName;
@@ -335,7 +287,6 @@
         }
       });
       
-      console.log('Final SEZ data:', sezData);
       return sezData;
     }
 
@@ -343,10 +294,9 @@
     window.addEventListener('load', async () => {
       try {
         await fetchSheetData();
-        console.log('Sheet data loaded successfully');
       } catch (error) {
         console.error('Failed to load sheet data:', error);
-        alert(`Failed to load SEZ data: ${error.message}\n\nPlease check the browser console for more details.`);
+        alert(`Failed to load SEZ data: ${error.message}`);
       }
     });
 
@@ -522,7 +472,7 @@
         alert("Please enter a valid expenditure amount");
         return;
       }
-      console.log("test", data)
+
       const income = expenditure * data.expenditureSEZincomeRatio;
       const investment = expenditure * data.expenditureToInvestmentRatio; 
       const jobs = expenditure * data.expenditureJobsRatio;
