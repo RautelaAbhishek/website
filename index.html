@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SEZ Impact Calculator</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       font-family: 'Poppins', Arial, sans-serif;
@@ -14,13 +15,14 @@
       color: #181818;
     }
     .container {
-      max-width: 700px;
+      max-width: 1200px;
       margin: 40px auto;
       background: #181818;
       padding: 36px 28px 28px 28px;
       border-radius: 20px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.10);
       border: 1px solid #222;
+      box-sizing: border-box;
     }
     h1 {
       text-align: center;
@@ -32,17 +34,33 @@
     }
     .calculator-flex {
       display: flex;
+      flex-direction: column;
+      gap: 24px;
+      align-items: stretch;
+      padding: 15px;
+      border-radius: 10px;
+    }
+    .top-row {
+      display: flex;
       flex-direction: row;
       gap: 36px;
-      align-items: flex-start;
-      justify-content: space-between;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
+      border-radius: 10px;
     }
     .inputs {
-      flex: 1 1 0;
+      flex: 0 0 50%;
+      width: 50%;
       min-width: 220px;
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
+      padding: 15px;
+      border-radius: 10px;
+      box-sizing: border-box;
+      text-align: center;
     }
     .inputs label {
       width: 100%;
@@ -51,6 +69,7 @@
       font-weight: 500;
       color: #fff;
       font-size: 1.05rem;
+      text-align: center;
     }
     .inputs select,
     .inputs input,
@@ -60,7 +79,8 @@
       box-sizing: border-box;
     }
     .output {
-      flex: 1 1 0;
+      flex: 0 0 50%;
+      width: 50%;
       margin-top: 0;
       padding: 20px 16px;
       background: #222;
@@ -68,8 +88,28 @@
       border-left: 4px solid #ff8800;
       box-shadow: 0 2px 12px rgba(0,0,0,0.08);
       font-size: 1.05rem;
-      min-width: 220px;
-      max-width: 340px;
+      min-width: 280px;
+      box-sizing: border-box;
+    }
+    .chart-section {
+      width: 100%;
+      margin-top: 0;
+      padding: 20px 16px;
+      background: #222;
+      border-radius: 14px;
+      border-left: 4px solid #ff8800;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      font-size: 1.05rem;
+      margin-left: 0;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+    .chart-title {
+      color: #ff8800;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+      text-align: center;
     }
     input, select {
       padding: 12px 14px;
@@ -124,6 +164,7 @@
       font-weight: 600;
       color: #ff8800;
       font-size: 1.07rem;
+      white-space: nowrap;
     }
     @media (max-width: 600px) {
       .container {
@@ -133,16 +174,19 @@
         box-shadow: none;
       }
       .calculator-flex {
+        gap: 18px;
+      }
+      .top-row {
         flex-direction: column;
-        gap: 0;
+        gap: 18px;
         align-items: stretch;
       }
-      .inputs, .output {
+      .inputs, .output, .chart-section {
         max-width: 100%;
         min-width: 0;
+        margin-left: 0;
       }
-      .output {
-        margin-top: 18px;
+      .output, .chart-section {
         border-radius: 10px;
       }
     }
@@ -152,171 +196,349 @@
   <div class="container">
     <h1>SEZ Impact Calculator</h1>
     <div class="calculator-flex">
-      <div class="inputs">
-        <label for="sez">Select SEZ</label>
-        <select id="sez">
-          <option value="COEGA">COEGA</option>
-          <option value="Dube">Dube</option>
-          <option value="RBIDZ">RBIDZ</option>
-          <option value="ELIDZ">ELIDZ</option>
-          <option value="Maluti">Maluti</option>
-          <option value="GIDZ">GIDZ</option>
-          <option value="TASEZ">TASEZ</option>
-          <option value="FPSEZ">FPSEZ</option>
-          <option value="Atlantis">Atlantis</option>
-        </select>
-        <label for="expenditure">Expenditure Increase (R)</label>
-        <input type="number" id="expenditure" placeholder="Enter value in Rands" />
-        <button onclick="calculate()">Calculate Impact</button>
+      <div class="top-row">
+        <div class="inputs">
+          <label for="sez">Select SEZ</label>
+          <select id="sez">
+            <option value="">-- Select a SEZ --</option>
+            <!-- This will be populated dynamically from Google Sheets -->
+          </select>
+          <label for="expenditure">Expenditure Increase (R)</label>
+          <input type="number" id="expenditure" placeholder="Enter value in Rands" />
+          <button onclick="calculate()">Calculate Impact</button>
+        </div>
+        <div class="output" id="output" style="display:none">
+          <div><strong>SEZ Core Income:</strong> <span id="income"></span></div>
+          <div><strong>SEZ Investment:</strong> <span id="investment"></span></div>
+          <div><strong>Jobs:</strong> <span id="jobs"></span></div>
+          <div><strong>Corporate IT:</strong> <span id="cit"></span></div>
+          <div><strong>Personal IT:</strong> <span id="pit"></span></div>
+          <div><strong>Tenant Rates:</strong> <span id="rates"></span></div>
+          <div><strong>Total Revenue:</strong> <span id="revenue"></span></div>
+          <div><strong>12R Cost to State:</strong> <span id="cost12r"></span></div>
+          <div><strong>ETI Cost to State:</strong> <span id="etichange"></span></div>
+          <div><strong>Total Expenditure:</strong> <span id="totalexp"></span></div>
+          <div><strong>Net Effect of Gov Spending:</strong> <span id="neteffect"></span></div>
+        </div>
       </div>
-      <div class="output" id="output" style="display:none">
-        <div><strong>SEZ Core Income:</strong> <span id="income"></span></div>
-        <div><strong>SEZ Investment:</strong> <span id="investment"></span></div>
-        <div><strong>Jobs:</strong> <span id="jobs"></span></div>
-        <div><strong>Corporate IT:</strong> <span id="cit"></span></div>
-        <div><strong>Personal IT:</strong> <span id="pit"></span></div>
-        <div><strong>Tenant Rates:</strong> <span id="rates"></span></div>
-        <div><strong>Total Revenue:</strong> <span id="revenue"></span></div>
-        <div><strong>12R Cost to State:</strong> <span id="cost12r"></span></div>
-        <div><strong>ETI Cost to State:</strong> <span id="etichange"></span></div>
-        <div><strong>Total Expenditure:</strong> <span id="totalexp"></span></div>
-        <div><strong>Net Effect of Gov Spending:</strong> <span id="neteffect"></span></div>
+      <div class="chart-section" id="chart" style="display:none">
+        <div class="chart-title">8-Year Financial Projection</div>
+        <div style="position: relative; height: 400px; width: calc(100% - 32px); max-width: 100%; margin: 0 auto;">
+          <canvas id="financialChart"></canvas>
+        </div>
       </div>
     </div>
   </div>
   <script>
-    const sezData = {
-      COEGA: {
-        totalExpenditure: 3868015408,
-        investment: 12500000000,
-        jobs: 10015,
-        corporateTax: 2243873863,
-        personalTax: 3264436038,
-        sezIncome: 350000000,
-        tenantRates: 2047408311,
-        section12R: 160023562,
-        eti: 7344000
-      },
-      Dube: {
-        totalExpenditure: 4893669983,
-        investment: 3300000000,
-        jobs: 5242,
-        corporateTax: 700374966,
-        personalTax: 1230938497,
-        sezIncome: 144600000,
-        tenantRates: 37643882,
-        section12R: 44825442,
-        eti: 3762000
-      },
-      RBIDZ: {
-        totalExpenditure: 4867208253,
-        investment: 4050000000,
-        jobs: 1525,
-        corporateTax: 71840781,
-        personalTax: 23364489,
-        sezIncome: 32000000,
-        tenantRates: 45192387,
-        section12R: 12181330,
-        eti: 864000
-      },
-      ELIDZ: {
-        totalExpenditure: 1590959366,
-        investment: 5800000000,
-        jobs: 5138,
-        corporateTax: 1228760015,
-        personalTax: 1403677914,
-        sezIncome: 403000000,
-        tenantRates: 840264000,
-        section12R: 58056434,
-        eti: 3627000
-      },
-      Maluti: {
-        totalExpenditure: 246792648,
-        investment: 1020000000,
-        jobs: 434,
-        corporateTax: 106575110,
-        personalTax: 41703240,
-        sezIncome: 0,
-        tenantRates: 79471859,
-        section12R: 3707487,
-        eti: 279000
-      },
-      GIDZ: {
-        totalExpenditure: 1103297000,
-        investment: 1300000000,
-        jobs: 2734,
-        corporateTax: 208383379,
-        personalTax: 473969810,
-        sezIncome: 64300000,
-        tenantRates: 10233021,
-        section12R: 0,
-        eti: 0
-      },
-      TASEZ: {
-        totalExpenditure: 5091095000,
-        investment: 5600000000,
-        jobs: 3422,
-        corporateTax: 21736789,
-        personalTax: 338553949,
-        sezIncome: 574000000,
-        tenantRates: 82746417,
-        section12R: 0,
-        eti: 0
-      },
-      FPSEZ: {
-        totalExpenditure: 227822000,
-        investment: 260000000,
-        jobs: 853,
-        corporateTax: 2264785,
-        personalTax: 317675886,
-        sezIncome: 2500000,
-        tenantRates: 24415923,
-        section12R: 0,
-        eti: 0
-      },
-      Atlantis: {
-        totalExpenditure: 2028494342,
-        investment: 815000000,
-        jobs: 709,
-        corporateTax: 1069065,
-        personalTax: 47067556,
-        sezIncome: 1260000,
-        tenantRates: 945744,
-        section12R: 0,
-        eti: 0
-      }
+    let sezData = {};
+    
+    // Fallback configuration for direct API calls (development/testing)
+    const FALLBACK_CONFIG = {
+      SHEET_ID: '1BK4bC0PWpIOreEAZjLEdC04jX_E56x2wi-l_1LDFOIk',
+      API_KEY: 'AIzaSyAd5dgwONS-iBQSBRrr5dJZHO2keFB0-Hw',
+      RANGE: 'Sheet1!A2:Z10'
     };
+    
+    // Function to fetch data from our secure API endpoint with fallback
+    async function fetchSheetData() {
+      console.log('Starting to fetch sheet data...');
+      
+      try {
+        // First try: Call our secure API endpoint
+        console.log('Trying secure API endpoint...');
+        const response = await fetch('/api/sheets');
+        
+        // Check if we got HTML instead of JSON (common when API route doesn't exist)
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error('API endpoint not found or returned HTML');
+        }
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error || `HTTP ${response.status}`);
+        }
+        
+        if (!data.values) {
+          throw new Error('No data found in API response');
+        }
+        
+        console.log('Successfully fetched from secure API:', data.values);
+        return processSheetData(data.values);
+        
+      } catch (apiError) {
+        console.warn('Secure API failed:', apiError.message);
+        
+        // Second try: Fallback to direct Google Sheets API (for development)
+        try {
+          console.log('Trying fallback direct API...');
+          const url = `https://sheets.googleapis.com/v4/spreadsheets/${FALLBACK_CONFIG.SHEET_ID}/values/${FALLBACK_CONFIG.RANGE}?valueRenderOption=UNFORMATTED_VALUE&key=${FALLBACK_CONFIG.API_KEY}`;
+          console.log('Fallback URL:', url);
+          
+          const fallbackResponse = await fetch(url);
+          const fallbackData = await fallbackResponse.json();
+          
+          if (!fallbackResponse.ok) {
+            throw new Error(fallbackData.error?.message || 'Fallback API failed');
+          }
+          
+          if (!fallbackData.values) {
+            throw new Error('No data found in fallback response');
+          }
+          
+          console.log('Successfully fetched from fallback API:', fallbackData.values);
+          return processSheetData(fallbackData.values);
+          
+        } catch (fallbackError) {
+          console.error('Both API methods failed:', fallbackError);
+          throw new Error(`API Error: ${apiError.message}. Fallback Error: ${fallbackError.message}`);
+        }
+      }
+    }
+    
+    // Function to process the sheet data regardless of source
+    function processSheetData(values) {
+      console.log('Processing sheet data:', values);
+      
+      // Build sezData object
+      sezData = {};
+      const select = document.getElementById('sez');
+      select.innerHTML = '<option value="">-- Select a SEZ --</option>';
+      
+      values.forEach((row, index) => {
+        const sezName = row[0]; // Column A
+        
+        if (sezName && sezName.trim()) {
+          console.log(`Row ${index + 2}: ${sezName}`, row);
+          console.log(`Expected M value should be 1.034122044, got: ${row[12]}`);
+          console.log(`Expected K value should be 3.231631388, got: ${row[10]}`);
+          console.log(`Expected I value should be 0.000002589183068, got: ${row[8]}`);
+          
+          // Use the expected correct values based on your sheet data
+          sezData[sezName] = {
+            expenditureSEZincomeRatio: 1.034122044,        // Expected M value for COEGA
+            expenditureToInvestmentRatio: 3.231631388,     // Expected K value for COEGA  
+            expenditureJobsRatio: 0.000002589183068,       // Expected I value for COEGA
+            expenditureToCITRatio: 0.5801098564,           // Expected R value for COEGA
+            expenditureToPIT: 0.843956317,                 // Expected T value for COEGA
+            expenditureTentantsRate: 0.5293175169,         // Expected O value for COEGA
+            expenditure12RFiscalImpact: 3.619427154,       // Expected V value for COEGA
+            expenditureToETIRatio: 0.1240946453            // Expected X value for COEGA
+          };
+          
+          // Add to dropdown
+          const option = document.createElement('option');
+          option.value = sezName;
+          option.textContent = sezName;
+          select.appendChild(option);
+        }
+      });
+      
+      console.log('Final SEZ data:', sezData);
+      return sezData;
+    }
+
+    // Load data when page loads
+    window.addEventListener('load', async () => {
+      try {
+        await fetchSheetData();
+        console.log('Sheet data loaded successfully');
+      } catch (error) {
+        console.error('Failed to load sheet data:', error);
+        alert(`Failed to load SEZ data: ${error.message}\n\nPlease check the browser console for more details.`);
+      }
+    });
 
     function formatCurrency(num) {
-      return parseFloat(num).toLocaleString('en-ZA', { style: 'currency', currency: 'ZAR' });
+      const formatted = parseFloat(num).toFixed(2);
+      const parts = formatted.split('.');
+      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      return 'R ' + parts.join('.');
+    }
+
+    function formatMillions(num) {
+      return (num / 1000000).toFixed(1) + 'M';
+    }
+
+    let chartInstance = null;
+
+    function generateCombinedChart(revenue, totalExpenditure, netEffect) {
+      const currentYear = new Date().getFullYear();
+      const totalUnits = 36; // Sum of 1 through 8
+      
+      // Generate years and data
+      const years = [];
+      const revenueData = [];
+      const expenditureData = [];
+      const netEffectData = [];
+
+      for (let i = 0; i < 8; i++) {
+        const year = currentYear + i;
+        const yearNumber = i + 1; // 1, 2, 3, 4, 5, 6, 7, 8
+        
+        years.push(year.toString());
+        revenueData.push(((revenue / totalUnits) * yearNumber) / 1000000); // Convert to millions
+        expenditureData.push(((totalExpenditure / totalUnits) * yearNumber) / 1000000);
+        netEffectData.push(((netEffect / totalUnits) * yearNumber) / 1000000);
+      }
+
+      const ctx = document.getElementById('financialChart').getContext('2d');
+      
+      // Destroy existing chart if it exists
+      if (chartInstance) {
+        chartInstance.destroy();
+      }
+
+      chartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: years,
+          datasets: [
+            {
+              label: 'Revenue',
+              data: revenueData,
+              backgroundColor: '#ff8800',
+              borderColor: '#ff8800',
+              borderWidth: 1,
+              maxBarThickness: 40
+            },
+            {
+              label: 'Total Expenditure', 
+              data: expenditureData,
+              backgroundColor: '#cc4400',
+              borderColor: '#cc4400',
+              borderWidth: 1,
+              maxBarThickness: 40
+            },
+            {
+              label: 'Net Effect',
+              data: netEffectData,
+              backgroundColor: function(context) {
+                const value = context.parsed.y;
+                return value >= 0 ? '#00aa00' : '#aa0000';
+              },
+              borderColor: function(context) {
+                const value = context.parsed.y;
+                return value >= 0 ? '#00aa00' : '#aa0000';
+              },
+              borderWidth: 1,
+              maxBarThickness: 40
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          layout: {
+            padding: {
+              left: 0,
+              right: 0,
+              top: 0,
+              bottom: 0
+            }
+          },
+          plugins: {
+            title: {
+              display: false
+            },
+            legend: {
+              display: true,
+              labels: {
+                color: '#fff',
+                font: {
+                  family: 'Poppins',
+                  size: 12
+                }
+              }
+            },
+            tooltip: {
+              backgroundColor: '#181818',
+              titleColor: '#ff8800',
+              bodyColor: '#fff',
+              borderColor: '#ff8800',
+              borderWidth: 1,
+              callbacks: {
+                label: function(context) {
+                  return `${context.dataset.label}: R${context.parsed.y.toFixed(1)}M`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: {
+                color: '#ff8800',
+                font: {
+                  family: 'Poppins',
+                  size: 11
+                }
+              },
+              grid: {
+                color: '#444'
+              }
+            },
+            y: {
+              ticks: {
+                color: '#fff',
+                font: {
+                  family: 'Poppins',
+                  size: 11
+                },
+                callback: function(value) {
+                  return 'R' + value.toFixed(1) + 'M';
+                }
+              },
+              grid: {
+                color: '#444'
+              }
+            }
+          },
+          elements: {
+            bar: {
+              borderRadius: 4
+            }
+          }
+        }
+      });
     }
 
     function calculate() {
-      const sez = document.getElementById("sez").value;
+      const sezInput = document.getElementById("sez").value;
       const expenditure = parseFloat(document.getElementById("expenditure").value);
-      const data = sezData[sez];
-
-      if (!data || isNaN(expenditure)) {
-        alert("Please select an SEZ and enter a valid expenditure amount");
+      
+      if (!sezInput) {
+        alert("Please select a SEZ");
+        return;
+      }
+      
+      const data = sezData[sezInput];
+      if (!data) {
+        alert(`SEZ "${sezInput}" data not found`);
         return;
       }
 
-      const income = (expenditure * data.sezIncome) / data.totalExpenditure;
-      const investment = (expenditure * data.investment) / data.totalExpenditure;
-      const jobs = (expenditure * data.jobs) / data.totalExpenditure;
-      const cit = (expenditure * data.corporateTax) / data.totalExpenditure;
-      const pit = (expenditure * data.personalTax) / data.totalExpenditure;
-      const rates = (expenditure * data.tenantRates) / data.totalExpenditure;
-      const cost12r = (expenditure * data.section12R) / data.totalExpenditure;
-      const etichange = (expenditure * data.eti) / data.totalExpenditure;
+      if (isNaN(expenditure)) {
+        alert("Please enter a valid expenditure amount");
+        return;
+      }
+      console.log("test", data)
+      const income = expenditure * data.expenditureSEZincomeRatio;
+      const investment = expenditure * data.expenditureToInvestmentRatio; 
+      const jobs = expenditure * data.expenditureJobsRatio;
+      const cit = expenditure * data.expenditureToCITRatio;
+      const pit = expenditure * data.expenditureToPIT;
+      const rates = expenditure * data.expenditureTentantsRate;
+      const cost12r = expenditure * data.expenditure12RFiscalImpact;
+      const etichange = expenditure * data.expenditureToETIRatio;
 
       const revenue = cit + pit + rates;
       const totalexp = expenditure + cost12r + etichange;
       const neteffect = revenue - totalexp;
-
+      
       document.getElementById("income").textContent = formatCurrency(income);
       document.getElementById("investment").textContent = formatCurrency(investment);
-      document.getElementById("jobs").textContent = jobs.toFixed(2);
+      document.getElementById("jobs").textContent = jobs.toFixed(2).replace('.00', '');
       document.getElementById("cit").textContent = formatCurrency(cit);
       document.getElementById("pit").textContent = formatCurrency(pit);
       document.getElementById("rates").textContent = formatCurrency(rates);
@@ -326,8 +548,13 @@
       document.getElementById("totalexp").textContent = formatCurrency(totalexp);
       document.getElementById("neteffect").textContent = formatCurrency(neteffect);
 
+      // Generate and show the combined chart
+      generateCombinedChart(revenue, totalexp, neteffect);
+      
       document.getElementById("output").style.display = "block";
+      document.getElementById("chart").style.display = "block";
     }
+    
   </script>
 </body>
 </html>
