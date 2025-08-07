@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   try {
     // Get API key from environment variable (secure)
     const API_KEY = process.env.GOOGLE_SHEETS_API_KEY;
-    const SHEET_ID = process.env.GOOGLE_SHEETS_ID;
+    const SHEET_ID = process.env.GOOGLE_SHEETS_ID || '1KTGC1dMkFcaKemq4EEdpwuoKH_IbxuSHhT2MA7soLPo';
     
     if (!API_KEY || !SHEET_ID) {
       return res.status(500).json({ 
@@ -28,10 +28,8 @@ export default async function handler(req, res) {
       });
     }
 
-    const RANGE = 'Sheet1!A2:Z10';
+    const RANGE = 'Sheet1!A2:X50';
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}?valueRenderOption=UNFORMATTED_VALUE&key=${API_KEY}`;
-
-    console.log('Fetching from:', url);
 
     const response = await fetch(url);
     const data = await response.json();
@@ -40,7 +38,6 @@ export default async function handler(req, res) {
       throw new Error(data.error?.message || `HTTP ${response.status}: ${response.statusText}`);
     }
 
-    console.log('Successfully fetched data:', data);
     return res.status(200).json(data);
   } catch (error) {
     console.error('API Error:', error);

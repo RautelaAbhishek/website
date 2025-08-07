@@ -235,11 +235,12 @@
     // Function to fetch data from secure API endpoint
     async function fetchSheetData() {
       try {
+        // First try: Call our secure API endpoint (works in production/Vercel)
         const response = await fetch('/api/sheets');
         
         const contentType = response.headers.get('content-type');
         if (!contentType || !contentType.includes('application/json')) {
-          throw new Error('API endpoint not found or returned HTML');
+          throw new Error('API endpoint not available');
         }
         
         const data = await response.json();
@@ -252,33 +253,52 @@
           throw new Error('No data found in API response');
         }
         
+        console.log('Raw sheet data:', data.values); // Temporary debug
         return processSheetData(data.values);
         
       } catch (error) {
-        throw error;
+        console.error('API failed:', error);
+        throw new Error(`Failed to load SEZ data: ${error.message}. Please ensure the server is running or deploy to Vercel.`);
       }
     }
     
     // Function to process the sheet data
     function processSheetData(values) {
+      console.log('Processing rows:', values.length); // Temporary debug
+      
       sezData = {};
       const select = document.getElementById('sez');
       select.innerHTML = '<option value="">-- Select a SEZ --</option>';
       
       values.forEach((row, index) => {
         const sezName = row[0];
+        console.log(`Row ${index}: SEZ="${sezName}", Length=${row.length}`); // Temporary debug
         
         if (sezName && sezName.trim()) {
-          sezData[sezName] = {
-            expenditureSEZincomeRatio: 1.034122044,
-            expenditureToInvestmentRatio: 3.231631388,
-            expenditureJobsRatio: 0.000002589183068,
-            expenditureToCITRatio: 0.5801098564,
-            expenditureToPIT: 0.843956317,
-            expenditureTentantsRate: 0.5293175169,
-            expenditure12RFiscalImpact: 3.619427154,
-            expenditureToETIRatio: 0.1240946453
+          console.log(`Processing ${sezName}:`);
+          console.log(`  Full row data:`, row);
+          console.log(`  Column L:`, row[11], typeof row[11]);
+          console.log(`  Column M:`, row[12], typeof row[12]);
+          console.log(`  Column N:`, row[13], typeof row[13]);
+          console.log(`  Column O:`, row[14], typeof row[14]);
+          
+          // Use A1-style references for clarity:
+          // A=0, B=1, C=2, ..., K=10, L=11, M=12, N=13, O=14, ..., R=17, T=19, V=21, X=23
+          const ratios = {
+            expenditureSEZincomeRatio: parseFloat(row[12]) || 0,        // Column M
+            expenditureToInvestmentRatio: parseFloat(row[10]) || 0,     // Column K  
+            expenditureJobsRatio: parseFloat(row[8]) || 0,              // Column I
+            expenditureToCITRatio: parseFloat(row[17]) || 0,            // Column R
+            expenditureToPIT: parseFloat(row[19]) || 0,                 // Column T
+            expenditureTentantsRate: parseFloat(row[14]) || 0,          // Column O
+            expenditure12RFiscalImpact: parseFloat(row[21]) || 0,       // Column V
+            expenditureToETIRatio: parseFloat(row[23]) || 0             // Column X
           };
+          
+          console.log(`  SEZ Income Ratio (Column M):`, row[12]);
+          
+          console.log(`${sezName} ratios:`, ratios); // Temporary debug
+          sezData[sezName] = ratios;
           
           const option = document.createElement('option');
           option.value = sezName;
@@ -287,6 +307,7 @@
         }
       });
       
+      console.log('Final sezData:', sezData); // Temporary debug
       return sezData;
     }
 
