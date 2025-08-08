@@ -232,7 +232,7 @@
   <script>
     let sezData = {};
     
-    // Function to fetch data from secure API endpoint
+      // Fetch data from secure API endpoint
     async function fetchSheetData() {
       try {
         // First try: Call our secure API endpoint (works in production/Vercel)
@@ -262,7 +262,7 @@
       }
     }
     
-    // Function to process the sheet data
+      // Process sheet data
     function processSheetData(values) {
       console.log('Processing rows:', values.length); // Temporary debug
       
@@ -311,7 +311,7 @@
       return sezData;
     }
 
-    // Load data when page loads
+      // Load data on page load
     window.addEventListener('load', async () => {
       try {
         await fetchSheetData();
@@ -336,22 +336,67 @@
 
     function generateCombinedChart(revenue, totalExpenditure, netEffect) {
       const currentYear = new Date().getFullYear();
-      const totalUnits = 36; // Sum of 1 through 8
-      
-      // Generate years and data
+      // Proposed growth rates
+      // Expenditure: constant per year (e.g., 1/8th of total)
+      // Revenue: years 1-4: -5% per year, years 5-8: +12% per year (compounded)
+      // Jobs: years 1-4: 0%, years 5-8: +8% per year (compounded)
+      // Costs: 2% per year compounded
+      // Net effect: calculated from above, will be negative in years 1-4, positive in 5-8
+
       const years = [];
       const revenueData = [];
       const expenditureData = [];
       const netEffectData = [];
-
+      // Per-year expenditure (constant)
+      const annualExpenditure = totalExpenditure / 8;
+      // Compounded cost growth (2% per year)
+      let costBase = annualExpenditure;
+      let costSum = 0;
+      for (let i = 0; i < 8; i++) {
+        costSum += costBase * Math.pow(1.02, i);
+      }
+      costBase = totalExpenditure / costSum * costBase;
+      // Revenue base for growth pattern
+      let revBase = 1;
+      let revSum = 0;
+      for (let i = 0; i < 8; i++) {
+        if (i < 4) {
+          revSum += revBase * Math.pow(0.95, i);
+        } else {
+          revSum += revBase * Math.pow(0.95, 3) * Math.pow(1.12, i - 3);
+        }
+      }
+      revBase = revenue / revSum;
+      // Net effect distribution using custom ramp pattern
+      let userRamp = [-1, -0.6714, -0.3429, -0.0143, 0.3143, 0.6429, 0.9714, 1.3];
+      
+      // Invert ramp if net effect is negative
+      if (netEffect < 0) {
+        userRamp = userRamp.map(x => -x);
+      }
+      
+      // Normalize ramp to sum to 1
+      const rampSum = userRamp.reduce((acc, v) => acc + v, 0);
+      if (rampSum === 0) {
+        throw new Error('Ramp values sum to zero - cannot normalize');
+      }
+      const netEffectDistribution = userRamp.map(x => x / rampSum);
       for (let i = 0; i < 8; i++) {
         const year = currentYear + i;
-        const yearNumber = i + 1; // 1, 2, 3, 4, 5, 6, 7, 8
-        
         years.push(year.toString());
-        revenueData.push(((revenue / totalUnits) * yearNumber) / 1000000); // Convert to millions
-        expenditureData.push(((totalExpenditure / totalUnits) * yearNumber) / 1000000);
-        netEffectData.push(((netEffect / totalUnits) * yearNumber) / 1000000);
+        // Revenue
+        let rev;
+        if (i < 4) {
+          rev = revBase * Math.pow(0.95, i);
+        } else {
+          rev = revBase * Math.pow(0.95, 3) * Math.pow(1.12, i - 3);
+        }
+        revenueData.push(rev / 1000000);
+        // Cost
+        const cost = costBase * Math.pow(1.02, i);
+        expenditureData.push(cost / 1000000);
+        // Net effect (custom distribution)
+        netEffectData.push((netEffect * netEffectDistribution[i]) / 1000000);
       }
 
       const ctx = document.getElementById('financialChart').getContext('2d');
@@ -519,7 +564,7 @@
       document.getElementById("totalexp").textContent = formatCurrency(totalexp);
       document.getElementById("neteffect").textContent = formatCurrency(neteffect);
 
-      // Generate and show the combined chart
+      // Show the combined chart
       generateCombinedChart(revenue, totalexp, neteffect);
       
       document.getElementById("output").style.display = "block";
