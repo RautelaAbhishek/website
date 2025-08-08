@@ -346,35 +346,20 @@
         }
       }
       revBase = revenue / revSum;
-      // Jobs: years 1-4: 0% growth, years 5-8: 8% per year
-      // Net effect: custom user-supplied ramp, normalized
-      let netEffectDistribution = [];
-      const n = 8;
-      let S = 1;
-      if (netEffect < 0) S = -1;
-      // Linear ramp from -a to +a, sum to S
-      // The formula for a ramp from x0 to x1 with n steps, sum = S:
-      // x_i = x0 + i * d, where d = (x1 - x0)/(n-1), sum = n/2 * (x0 + x1) = S
-      // Let's solve for x0 and x1 such that x0 = -a, x1 = a, so sum = n/2 * (x1 + x0) = n/2 * 0 = 0, but we want sum = S
-      // Instead, use x_i = S/n + m*(2*i - n - 1), where m is chosen so min is negative, max is positive, and sum is S
-      // But for a simple linear ramp from -a to +a, sum is always 0. To get sum S, add S/n to each value.
-      // So, ramp: x_i = S/n + a * (2*(i+1) - (n+1))
-      // But sum of a * (2*(i+1)-(n+1)) over i=0..n-1 is 0, so sum is S/n * n = S
-      // Let's choose a so that the min is negative, max is positive, and the sum is S.
-      // Let's set the ramp from -r to +r, but offset by S/n.
-      // Let's pick r = 0.5 (so range is 1), but you can adjust for more/less lag.
-      // Explicitly set first 4 years negative, last 4 positive, linear ramp, sum to S
-      // Net effect: custom user-supplied ramp, normalized so sum is 1 (or -1)
+      // Net effect distribution using custom ramp pattern
       let userRamp = [-1, -0.6714, -0.3429, -0.0143, 0.3143, 0.6429, 0.9714, 1.3];
-      // If netEffect is negative, invert the ramp
+      
+      // Invert ramp if net effect is negative
       if (netEffect < 0) {
         userRamp = userRamp.map(x => -x);
       }
+      
+      // Normalize ramp to sum to 1
       const rampSum = userRamp.reduce((acc, v) => acc + v, 0);
-      const normalized = userRamp.map(x => x / rampSum);
-      for (let i = 0; i < n; i++) {
-        netEffectDistribution.push(normalized[i]);
+      if (rampSum === 0) {
+        throw new Error('Ramp values sum to zero - cannot normalize');
       }
+      const netEffectDistribution = userRamp.map(x => x / rampSum);
       for (let i = 0; i < 8; i++) {
         const year = currentYear + i;
         years.push(year.toString());
