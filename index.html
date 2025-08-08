@@ -253,7 +253,6 @@
           throw new Error('No data found in API response');
         }
         
-        console.log('Raw sheet data:', data.values); // Temporary debug
         return processSheetData(data.values);
         
       } catch (error) {
@@ -264,25 +263,12 @@
     
       // Process sheet data
     function processSheetData(values) {
-      console.log('Processing rows:', values.length); // Temporary debug
-      
       sezData = {};
       const select = document.getElementById('sez');
       select.innerHTML = '<option value="">-- Select a SEZ --</option>';
-      
-      values.forEach((row, index) => {
+      values.forEach((row) => {
         const sezName = row[0];
-        console.log(`Row ${index}: SEZ="${sezName}", Length=${row.length}`); // Temporary debug
-        
         if (sezName && sezName.trim()) {
-          console.log(`Processing ${sezName}:`);
-          console.log(`  Full row data:`, row);
-          console.log(`  Column L:`, row[11], typeof row[11]);
-          console.log(`  Column M:`, row[12], typeof row[12]);
-          console.log(`  Column N:`, row[13], typeof row[13]);
-          console.log(`  Column O:`, row[14], typeof row[14]);
-          
-          // Use A1-style references for clarity:
           // A=0, B=1, C=2, ..., K=10, L=11, M=12, N=13, O=14, ..., R=17, T=19, V=21, X=23
           const ratios = {
             expenditureSEZincomeRatio: parseFloat(row[12]) || 0,        // Column M
@@ -294,20 +280,13 @@
             expenditure12RFiscalImpact: parseFloat(row[21]) || 0,       // Column V
             expenditureToETIRatio: parseFloat(row[23]) || 0             // Column X
           };
-          
-          console.log(`  SEZ Income Ratio (Column M):`, row[12]);
-          
-          console.log(`${sezName} ratios:`, ratios); // Temporary debug
           sezData[sezName] = ratios;
-          
           const option = document.createElement('option');
           option.value = sezName;
           option.textContent = sezName;
           select.appendChild(option);
         }
       });
-      
-      console.log('Final sezData:', sezData); // Temporary debug
       return sezData;
     }
 
