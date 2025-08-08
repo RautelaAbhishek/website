@@ -365,12 +365,27 @@
       // Let's choose a so that the min is negative, max is positive, and the sum is S.
       // Let's set the ramp from -r to +r, but offset by S/n.
       // Let's pick r = 0.5 (so range is 1), but you can adjust for more/less lag.
-      // Shift the ramp so that the first 4 years are negative, last 4 positive
-      // We want the zero crossing between years 4 and 5 (i=3 and i=4)
-      // So, center the ramp at i=3.5: ramp = ((i - 3.5) / 3.5)
+      // Explicitly set first 4 years negative, last 4 positive, linear ramp, sum to S
+      // Let x0, x1, x2, x3 < 0 and x4, x5, x6, x7 > 0, and all 8 sum to S
+      // Use a linear ramp: values = a, b, c, d, e, f, g, h
+      // a < b < c < d < 0 < e < f < g < h
+      // Let values = [-(4-t)*m, ..., -m, m, ..., (4-t)*m] for t=1..4, then scale so sum is S
+      // Actually, use a ramp from -3.5 to +3.5 (step 1), then scale so sum is S
+      let ramp = [];
       for (let i = 0; i < n; i++) {
-        const ramp = (i - 3.5) / 3.5; // -1 at i=0, 0 at i=3.5, +1 at i=7
-        netEffectDistribution.push(S / n + ramp * (S / 2));
+        ramp.push(i - 3.5);
+      }
+      // Now scale so sum is S
+      const rampSum = ramp.reduce((acc, v) => acc + v, 0); // should be 0
+      // Add offset so sum is S: x_i = ramp[i] * m + offset, sum(x_i) = S
+      // Since sum(ramp) = 0, offset = S/n
+      // Choose m so that x3 < 0, x4 > 0, and ramp is linear
+      // But since ramp is symmetric, just use x_i = S/n + (ramp[i] * m)
+      // Find m so that x3 < 0, x4 > 0, and x3 + x4 = S/4 (since they are the middle values)
+      // Actually, just set m = S/8 (so the range is S, and sum is S)
+      const m = S / 8;
+      for (let i = 0; i < n; i++) {
+        netEffectDistribution.push(S / n + ramp[i] * m);
       }
       for (let i = 0; i < 8; i++) {
         const year = currentYear + i;
