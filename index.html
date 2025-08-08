@@ -371,21 +371,14 @@
       // a < b < c < d < 0 < e < f < g < h
       // Let values = [-(4-t)*m, ..., -m, m, ..., (4-t)*m] for t=1..4, then scale so sum is S
       // Actually, use a ramp from -3.5 to +3.5 (step 1), then scale so sum is S
-      let ramp = [];
+      // Use user-supplied ramp for net effect
+      // [-1, -0.6714, -0.3429, -0.0143, 0.3143, 0.6429, 0.9714, 1.3]
+      const userRamp = [-1, -0.6714, -0.3429, -0.0143, 0.3143, 0.6429, 0.9714, 1.3];
+      // Normalize so sum is 1 (or -1)
+      const rampSum = userRamp.reduce((acc, v) => acc + v, 0);
+      const normalized = userRamp.map(x => x / rampSum);
       for (let i = 0; i < n; i++) {
-        ramp.push(i - 3.5);
-      }
-      // Now scale so sum is S
-      const rampSum = ramp.reduce((acc, v) => acc + v, 0); // should be 0
-      // Add offset so sum is S: x_i = ramp[i] * m + offset, sum(x_i) = S
-      // Since sum(ramp) = 0, offset = S/n
-      // Choose m so that x3 < 0, x4 > 0, and ramp is linear
-      // But since ramp is symmetric, just use x_i = S/n + (ramp[i] * m)
-      // Find m so that x3 < 0, x4 > 0, and x3 + x4 = S/4 (since they are the middle values)
-      // Actually, just set m = S/8 (so the range is S, and sum is S)
-      const m = S / 8;
-      for (let i = 0; i < n; i++) {
-        netEffectDistribution.push(S / n + ramp[i] * m);
+        netEffectDistribution.push(normalized[i]);
       }
       for (let i = 0; i < 8; i++) {
         const year = currentYear + i;
