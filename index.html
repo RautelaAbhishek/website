@@ -365,10 +365,12 @@
       // Let's choose a so that the min is negative, max is positive, and the sum is S.
       // Let's set the ramp from -r to +r, but offset by S/n.
       // Let's pick r = 0.5 (so range is 1), but you can adjust for more/less lag.
-      const rampRange = 1; // range from -0.5 to +0.5
+      // Shift the ramp so that the first 4 years are negative, last 4 positive
+      // We want the zero crossing between years 4 and 5 (i=3 and i=4)
+      // So, center the ramp at i=3.5: ramp = ((i - 3.5) / 3.5)
       for (let i = 0; i < n; i++) {
-        const ramp = ((i / (n - 1)) - 0.5) * rampRange; // -0.5 to +0.5
-        netEffectDistribution.push(S / n + ramp * S);
+        const ramp = (i - 3.5) / 3.5; // -1 at i=0, 0 at i=3.5, +1 at i=7
+        netEffectDistribution.push(S / n + ramp * (S / 2));
       }
       for (let i = 0; i < 8; i++) {
         const year = currentYear + i;
