@@ -349,13 +349,16 @@
       // Jobs: years 1-4: 0% growth, years 5-8: 8% per year
       // (Not shown in chart, but can be added if needed)
       // Net effect: custom distribution, first 4 years negative, last 4 positive, sum to 1
-      const netEffectDistribution = [-0.3, -0.25, -0.2, -0.15, 0.1, 0.2, 0.3, 1.3];
-      // Normalize if needed
-      const sumDist = netEffectDistribution.reduce((a, b) => a + b, 0);
-      if (Math.abs(sumDist - 1) > 0.0001) {
-        for (let i = 0; i < netEffectDistribution.length; i++) {
-          netEffectDistribution[i] = netEffectDistribution[i] / sumDist;
-        }
+      // Linear ramp: first 4 negative, last 4 positive, equal step, sum to 1 (or -1)
+      let netEffectDistribution = [];
+      const n = 8;
+      // Create a ramp from -a to +a, sum to 1 (or -1)
+      // For sum S, a = (2*S)/(n*n-n)
+      let S = 1;
+      if (netEffect < 0) S = -1;
+      const a = (2 * S) / (n * n - n);
+      for (let i = 0; i < n; i++) {
+        netEffectDistribution.push(a * (2 * i - (n - 1)));
       }
       for (let i = 0; i < 8; i++) {
         const year = currentYear + i;
