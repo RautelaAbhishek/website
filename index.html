@@ -232,7 +232,7 @@
   <script>
     let sezData = {};
     
-    // Function to fetch data from secure API endpoint
+      // Fetch data from secure API endpoint
     async function fetchSheetData() {
       try {
         // First try: Call our secure API endpoint (works in production/Vercel)
@@ -261,7 +261,7 @@
       }
     }
     
-    // Function to process the sheet data
+      // Process sheet data
     function processSheetData(values) {
       sezData = {};
       const select = document.getElementById('sez');
@@ -290,7 +290,7 @@
       return sezData;
     }
 
-    // Load data when page loads
+      // Load data on page load
     window.addEventListener('load', async () => {
       try {
         await fetchSheetData();
@@ -326,16 +326,16 @@
       const revenueData = [];
       const expenditureData = [];
       const netEffectData = [];
-      // Calculate per-year expenditure (constant)
+      // Per-year expenditure (constant)
       const annualExpenditure = totalExpenditure / 8;
-      // Calculate compounded cost growth (2% per year)
+      // Compounded cost growth (2% per year)
       let costBase = annualExpenditure;
       let costSum = 0;
       for (let i = 0; i < 8; i++) {
         costSum += costBase * Math.pow(1.02, i);
       }
       costBase = totalExpenditure / costSum * costBase;
-      // Calculate revenue base for growth pattern
+      // Revenue base for growth pattern
       let revBase = 1;
       let revSum = 0;
       for (let i = 0; i < 8; i++) {
@@ -347,9 +347,7 @@
       }
       revBase = revenue / revSum;
       // Jobs: years 1-4: 0% growth, years 5-8: 8% per year
-      // (Not shown in chart, but can be added if needed)
-      // Net effect: custom distribution, all 8 years sum to 1 (or -1)
-      // Linear ramp: from negative to positive, but sum of all 8 values is exactly 1 (or -1)
+      // Net effect: custom user-supplied ramp, normalized
       let netEffectDistribution = [];
       const n = 8;
       let S = 1;
@@ -556,7 +554,7 @@
       document.getElementById("totalexp").textContent = formatCurrency(totalexp);
       document.getElementById("neteffect").textContent = formatCurrency(neteffect);
 
-      // Generate and show the combined chart
+      // Show the combined chart
       generateCombinedChart(revenue, totalexp, neteffect);
       
       document.getElementById("output").style.display = "block";
