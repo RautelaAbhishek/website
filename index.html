@@ -348,17 +348,27 @@
       revBase = revenue / revSum;
       // Jobs: years 1-4: 0% growth, years 5-8: 8% per year
       // (Not shown in chart, but can be added if needed)
-      // Net effect: custom distribution, first 4 years negative, last 4 positive, sum to 1
-      // Linear ramp: first 4 negative, last 4 positive, equal step, sum to 1 (or -1)
+      // Net effect: custom distribution, all 8 years sum to 1 (or -1)
+      // Linear ramp: from negative to positive, but sum of all 8 values is exactly 1 (or -1)
       let netEffectDistribution = [];
       const n = 8;
-      // Create a ramp from -a to +a, sum to 1 (or -1)
-      // For sum S, a = (2*S)/(n*n-n)
       let S = 1;
       if (netEffect < 0) S = -1;
-      const a = (2 * S) / (n * n - n);
+      // Linear ramp from -a to +a, sum to S
+      // The formula for a ramp from x0 to x1 with n steps, sum = S:
+      // x_i = x0 + i * d, where d = (x1 - x0)/(n-1), sum = n/2 * (x0 + x1) = S
+      // Let's solve for x0 and x1 such that x0 = -a, x1 = a, so sum = n/2 * (x1 + x0) = n/2 * 0 = 0, but we want sum = S
+      // Instead, use x_i = S/n + m*(2*i - n - 1), where m is chosen so min is negative, max is positive, and sum is S
+      // But for a simple linear ramp from -a to +a, sum is always 0. To get sum S, add S/n to each value.
+      // So, ramp: x_i = S/n + a * (2*(i+1) - (n+1))
+      // But sum of a * (2*(i+1)-(n+1)) over i=0..n-1 is 0, so sum is S/n * n = S
+      // Let's choose a so that the min is negative, max is positive, and the sum is S.
+      // Let's set the ramp from -r to +r, but offset by S/n.
+      // Let's pick r = 0.5 (so range is 1), but you can adjust for more/less lag.
+      const rampRange = 1; // range from -0.5 to +0.5
       for (let i = 0; i < n; i++) {
-        netEffectDistribution.push(a * (2 * i - (n - 1)));
+        const ramp = ((i / (n - 1)) - 0.5) * rampRange; // -0.5 to +0.5
+        netEffectDistribution.push(S / n + ramp * S);
       }
       for (let i = 0; i < 8; i++) {
         const year = currentYear + i;
