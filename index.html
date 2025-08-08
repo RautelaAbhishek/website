@@ -347,9 +347,17 @@
       }
       revBase = revenue / revSum;
       
-      // Net effect distribution: first 4 years negative, last 4 years positive
-      // Create a pattern that sums to 1, with negative values for years 1-4, positive for years 5-8
-      const basePattern = [-0.2, -0.15, -0.1, -0.05, 0.1, 0.15, 0.2, 0.25]; // Sums to 0.2
+      // Net effect distribution: first 4 years always negative, last 4 years always positive
+      // Use absolute values to ensure correct sign regardless of net effect sign
+      // Base pattern: years 1-4 sum to -1, years 5-8 sum to 2, total sum = 1
+      let basePattern = [-0.25, -0.25, -0.25, -0.25, 0.5, 0.5, 0.5, 0.5];
+      
+      // If net effect is negative, we need to flip the pattern so first 4 years stay negative
+      if (netEffect < 0) {
+        basePattern = basePattern.map(x => -x); // This makes first 4 positive, last 4 negative
+        basePattern = basePattern.reverse(); // Now first 4 are negative again, last 4 positive
+      }
+      
       const patternSum = basePattern.reduce((acc, v) => acc + v, 0);
       const netEffectDistribution = basePattern.map(x => x / patternSum); // Normalize to sum to 1
       
