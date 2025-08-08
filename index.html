@@ -315,31 +315,76 @@
 
     function generateCombinedChart(revenue, totalExpenditure, netEffect) {
       const currentYear = new Date().getFullYear();
-      const totalUnits = 36; // Sum of 1 through 8
-      // Custom distribution for net effect: first 4 years negative, total sums to 1
-      // Example: [-0.3, -0.25, -0.2, -0.15, 0.1, 0.2, 0.3, 1.1] (sum = 1)
-      const netEffectDistribution = [-0.3, -0.25, -0.2, -0.15, 0.1, 0.2, 0.3, 1.3];
-      // Adjust last value so sum is exactly 1
-      const sumDist = netEffectDistribution.reduce((a, b) => a + b, 0);
-      if (Math.abs(sumDist - 1) > 0.0001) {
-        // Normalize if needed
-        for (let i = 0; i < netEffectDistribution.length; i++) {
-          netEffectDistribution[i] = netEffectDistribution[i] / sumDist;
-        }
-      }
-      // Generate years and data
+      // Proposed growth rates
+      // Expenditure: constant per year (e.g., 1/8th of total)
+      // Revenue: years 1-4: -5% per year, years 5-8: +12% per year (compounded)
+      // Jobs: years 1-4: 0%, years 5-8: +8% per year (compounded)
+      // Costs: 2% per year compounded
+      // Net effect: calculated from above, will be negative in years 1-4, positive in 5-8
+
       const years = [];
       const revenueData = [];
       const expenditureData = [];
       const netEffectData = [];
 
+      // Decompose revenue and costs into base values
+      // We'll use the calculated 'revenue' and 'totalExpenditure' as the 8-year totals
+      // For per-year base, we reverse-compound to get the starting value
+      // For simplicity, we use the same approach for all revenue variables
+
+      // Calculate per-year expenditure (constant)
+      const annualExpenditure = totalExpenditure / 8;
+
+      // Calculate compounded cost growth (2% per year)
+      // Find base cost so that sum of 8 years (with 2% growth) = totalExpenditure
+      let costBase = annualExpenditure;
+      let costSum = 0;
+      for (let i = 0; i < 8; i++) {
+        costSum += costBase * Math.pow(1.02, i);
+      }
+      costBase = totalExpenditure / costSum * costBase;
+
+      // Calculate revenue base for growth pattern
+      // Years 1-4: -5% per year, years 5-8: +12% per year (compounded)
+      // Find base so that sum of 8 years = total revenue
+      let revBase = 1;
+      let revSum = 0;
+      for (let i = 0; i < 8; i++) {
+        if (i < 4) {
+          revSum += revBase * Math.pow(0.95, i);
+        } else {
+          revSum += revBase * Math.pow(0.95, 3) * Math.pow(1.12, i - 3);
+        }
+      }
+      revBase = revenue / revSum;
+
+      // Net effect is revenue - cost per year
+      let netSum = 0;
       for (let i = 0; i < 8; i++) {
         const year = currentYear + i;
-        const yearNumber = i + 1; // 1, 2, 3, 4, 5, 6, 7, 8
         years.push(year.toString());
-        revenueData.push(((revenue / totalUnits) * yearNumber) / 1000000); // Convert to millions
-        expenditureData.push(((totalExpenditure / totalUnits) * yearNumber) / 1000000);
-        netEffectData.push((netEffect * netEffectDistribution[i]) / 1000000);
+        // Revenue
+        let rev;
+        if (i < 4) {
+          rev = revBase * Math.pow(0.95, i);
+        } else {
+          rev = revBase * Math.pow(0.95, 3) * Math.pow(1.12, i - 3);
+        }
+        revenueData.push(rev / 1000000);
+        // Cost
+        const cost = costBase * Math.pow(1.02, i);
+        expenditureData.push(cost / 1000000);
+        // Net effect
+        const net = rev - cost;
+        netEffectData.push(net / 1000000);
+        netSum += net;
+      }
+      // Adjust last year to ensure total net effect matches calculated value
+      const netEffectTotal = netEffect;
+      const netEffectCurrentSum = netSum;
+      if (Math.abs(netEffectCurrentSum - netEffectTotal) > 0.01) {
+        // Add the difference to the last year
+        netEffectData[7] += (netEffectTotal - netEffectCurrentSum) / 1000000;
       }
 
       const ctx = document.getElementById('financialChart').getContext('2d');
