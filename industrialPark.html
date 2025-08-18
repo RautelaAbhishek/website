@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SEZ Impact Calculator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: 'Poppins', Arial, sans-serif;
+      background: #fff;
+      margin: 0;
+      padding: 0;
+      color: #181818;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 40px auto;
+      background: #181818;
+      padding: 36px 28px 28px 28px;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+      border: 1px solid #222;
+      box-sizing: border-box;
+    }
+    h1 {
+      text-align: center;
+      color: #ff8800;
+      font-size: 1.7rem;
+      margin-bottom: 24px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .calculator-flex {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      align-items: stretch;
+      padding: 15px;
+      border-radius: 10px;
+    }
+    .top-row {
+      display: flex;
+      flex-direction: row;
+      gap: 36px;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
+      border-radius: 10px;
+    }
+    .inputs {
+      flex: 0 0 50%;
+      width: 50%;
+      min-width: 220px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
+      border-radius: 10px;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    .inputs label {
+      width: 100%;
+      max-width: 340px;
+      margin: 14px 0 6px;
+      font-weight: 500;
+      color: #fff;
+      font-size: 1.05rem;
+      text-align: center;
+    }
+    .inputs select,
+    .inputs input,
+    .inputs button {
+      width: 100%;
+      max-width: 340px;
+      box-sizing: border-box;
+    }
+    .output {
+      flex: 0 0 50%;
+      width: 50%;
+      margin-top: 0;
+      padding: 20px 16px;
+      background: #222;
+      border-radius: 14px;
+      border-left: 4px solid #ff8800;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      font-size: 1.05rem;
+      min-width: 280px;
+      box-sizing: border-box;
+    }
+    .chart-section {
+      width: 100%;
+      margin-top: 0;
+      padding: 20px 16px;
+      background: #222;
+      border-radius: 14px;
+      border-left: 4px solid #ff8800;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      font-size: 1.05rem;
+      margin-left: 0;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+    .chart-title {
+      color: #ff8800;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    input, select {
+      padding: 12px 14px;
+      border-radius: 8px;
+      border: 1px solid #ff8800;
+      background: #181818;
+      font-size: 1.08rem;
+      margin-bottom: 14px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      color: #fff;
+    }
+    input:focus, select:focus {
+      border-color: #ff8800;
+      box-shadow: 0 2px 8px rgba(255,136,0,0.09);
+      outline: none;
+    }
+    button {
+      padding: 14px;
+      background: #ff8800;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.13rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+      box-shadow: 0 2px 8px rgba(255,136,0,0.07);
+      transition: background 0.2s, transform 0.15s;
+    }
+    button:hover, button:focus {
+      background: #fff;
+      color: #181818;
+      transform: translateY(-2px) scale(1.03);
+      outline: none;
+    }
+    .output div {
+      margin: 12px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #444;
+      padding-bottom: 8px;
+      font-size: 1.04rem;
+      color: #fff;
+    }
+    .output div:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .output span {
+      font-weight: 600;
+      color: #ff8800;
+      font-size: 1.07rem;
+      white-space: nowrap;
+    }
+    @media (max-width: 600px) {
+      .container {
+        max-width: 100vw;
+        padding: 12px 2vw;
+        border-radius: 0;
+        box-shadow: none;
+      }
+      .calculator-flex {
+        gap: 18px;
+      }
+      .top-row {
+        flex-direction: column;
+        gap: 18px;
+        align-items: stretch;
+      }
+      .inputs, .output, .chart-section {
+        max-width: 100%;
+        min-width: 0;
+        margin-left: 0;
+      }
+      .output, .chart-section {
+        border-radius: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Industrial Parks Impact Calculator</h1>
+    <div class="calculator-flex">
+      <div class="top-row">
+        <div class="inputs">
+          <label for="sez">Select SEZ</label>
+          <select id="sez">
+            <option value="">-- Select a SEZ --</option>
+            <!-- This will be populated dynamically from Google Sheets -->
+          </select>
+          <label for="expenditure">Expenditure Increase (R)</label>
+          <input type="number" id="expenditure" placeholder="Enter value in Rands" />
+          <button onclick="calculate()">Calculate Impact</button>
+        </div>
+        <div class="output" id="output" style="display:none">
+          <div><strong>SEZ Core Income:</strong> <span id="income"></span></div>
+          <div><strong>SEZ Investment:</strong> <span id="investment"></span></div>
+          <div><strong>Jobs:</strong> <span id="jobs"></span></div>
+          <div><strong>Corporate IT:</strong> <span id="cit"></span></div>
+          <div><strong>Personal IT:</strong> <span id="pit"></span></div>
+          <div><strong>Tenant Rates:</strong> <span id="rates"></span></div>
+          <div><strong>Total Revenue:</strong> <span id="revenue"></span></div>
+          <div><strong>12R Cost to State:</strong> <span id="cost12r"></span></div>
+          <div><strong>ETI Cost to State:</strong> <span id="etichange"></span></div>
+          <div><strong>Total Expenditure:</strong> <span id="totalexp"></span></div>
+          <div><strong>Net Effect of Gov Spending:</strong> <span id="neteffect"></span></div>
+        </div>
+      </div>
+      <div class="chart-section" id="chart" style="display:none">
+        <div class="chart-title">8-Year Financial Projection</div>
+        <div style="position: relative; height: 400px; width: calc(100% - 32px); max-width: 100%; margin: 0 auto;">
+          <canvas id="financialChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    let sezData = {};
+    
+      // Fetch data from secure API endpoint
+    async function fetchSheetData() {
+      try {
+        // First try: Call our secure API endpoint (works in production/Vercel)
+        const response = await fetch('/api/sheets');
+        
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error('API endpoint not available');
+        }
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error || `HTTP ${response.status}`);
+        }
+        
+        if (!data.values) {
+          throw new Error('No data found in API response');
+        }
+        
+        return processSheetData(data.values);
+        
+      } catch (error) {
+        console.error('API failed:', error);
+        throw new Error(`Failed to load SEZ data: ${error.message}. Please ensure the server is running or deploy to Vercel.`);
+      }
+    }
+    
+      // Process sheet data
+    function processSheetData(values) {
+      sezData = {};
+      const select = document.getElementById('sez');
+      select.innerHTML = '<option value="">-- Select a SEZ --</option>';
+      values.forEach((row) => {
+        const sezName = row[0];
+        if (sezName && sezName.trim()) {
+          // A=0, B=1, C=2, ..., K=10, L=11, M=12, N=13, O=14, ..., R=17, T=19, V=21, X=23
+          const ratios = {
+            expenditureSEZincomeRatio: parseFloat(row[12]) || 0,        // Column M
+            expenditureToInvestmentRatio: parseFloat(row[10]) || 0,     // Column K  
+            expenditureJobsRatio: parseFloat(row[8]) || 0,              // Column I
+            expenditureToCITRatio: parseFloat(row[17]) || 0,            // Column R
+            expenditureToPIT: parseFloat(row[19]) || 0,                 // Column T
+            expenditureTentantsRate: parseFloat(row[14]) || 0,          // Column O
+            expenditure12RFiscalImpact: parseFloat(row[21]) || 0,       // Column V
+            expenditureToETIRatio: parseFloat(row[23]) || 0             // Column X
+          };
+          sezData[sezName] = ratios;
+          const option = document.createElement('option');
+          option.value = sezName;
+          option.textContent = sezName;
+          select.appendChild(option);
+        }
+      });
+      return sezData;
+    }
+
+      // Load data on page load
+    window.addEventListener('load', async () => {
+      try {
+        await fetchSheetData();
+      } catch (error) {
+        console.error('Failed to load sheet data:', error);
+        alert(`Failed to load SEZ data: ${error.message}`);
+      }
+    });
+
+    function formatCurrency(num) {
+      const formatted = parseFloat(num).toFixed(2);
+      const parts = formatted.split('.');
+      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      return 'R ' + parts.join('.');
+    }
+
+    function formatMillions(num) {
+      return (num / 1000000).toFixed(1) + 'M';
+    }
+
+    let chartInstance = null;
+
+    function generateCombinedChart(revenue, totalExpenditure, netEffect) {
+      const currentYear = new Date().getFullYear();
+      // Proposed growth rates
+      // Expenditure: constant per year (e.g., 1/8th of total)
+      // Revenue: years 1-4: -5% per year, years 5-8: +12% per year (compounded)
+      // Jobs: years 1-4: 0%, years 5-8: +8% per year (compounded)
+      // Costs: 2% per year compounded
+      // Net effect: calculated from above, will be negative in years 1-4, positive in 5-8
+
+      const years = [];
+      const revenueData = [];
+      const expenditureData = [];
+      const netEffectData = [];
+      // Per-year expenditure (constant)
+      const annualExpenditure = totalExpenditure / 8;
+      // Compounded cost growth (2% per year)
+      let costBase = annualExpenditure;
+      let costSum = 0;
+      for (let i = 0; i < 8; i++) {
+        costSum += costBase * Math.pow(1.02, i);
+      }
+      costBase = totalExpenditure / costSum * costBase;
+      // Revenue base for growth pattern
+      let revBase = 1;
+      let revSum = 0;
+      for (let i = 0; i < 8; i++) {
+        if (i < 4) {
+          revSum += revBase * Math.pow(0.95, i);
+        } else {
+          revSum += revBase * Math.pow(0.95, 3) * Math.pow(1.12, i - 3);
+        }
+      }
+      revBase = revenue / revSum;
+      
+      // Net effect distribution: first 4 years always negative, last 4 years always positive
+      // Use absolute values to ensure correct sign regardless of net effect sign
+      // Base pattern: years 1-4 sum to -1, years 5-8 sum to 2, total sum = 1
+      // Years 1-4: negative, sum to -1; Years 5-8: positive, sum to 2; all incrementing
+      let basePattern = [
+        -0.40, -0.30, -0.20, -0.10, 0.32, 0.44, 0.56, 0.68 // sums: first 4 = -1, last 4 = 2
+      ];
+      
+      // If net effect is negative, we need to flip the pattern so first 4 years stay negative
+      if (netEffect < 0) {
+        basePattern = basePattern.map(x => -x); // This makes first 4 positive, last 4 negative
+        basePattern = basePattern.reverse(); // Now first 4 are negative again, last 4 positive
+      }
+      
+      const patternSum = basePattern.reduce((acc, v) => acc + v, 0);
+      const netEffectDistribution = basePattern.map(x => x / patternSum); // Normalize to sum to 1
+      
+      for (let i = 0; i < 8; i++) {
+        const year = currentYear + i;
+        years.push(year.toString());
+        // Revenue
+        let rev;
+        if (i < 4) {
+          rev = revBase * Math.pow(0.95, i);
+        } else {
+          rev = revBase * Math.pow(0.95, 3) * Math.pow(1.12, i - 3);
+        }
+        revenueData.push(rev / 1000000);
+        // Cost
+        const cost = costBase * Math.pow(1.02, i);
+        expenditureData.push(cost / 1000000);
+        // Net effect (custom distribution)
+        netEffectData.push((netEffect * netEffectDistribution[i]) / 1000000);
+      }
+
+      const ctx = document.getElementById('financialChart').getContext('2d');
+      
+      // Destroy existing chart if it exists
+      if (chartInstance) {
+        chartInstance.destroy();
+      }
+
+      chartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: years,
+          datasets: [
+            {
+              label: 'Revenue',
+              data: revenueData,
+              backgroundColor: '#ff8800',
+              borderColor: '#ff8800',
+              borderWidth: 1,
+              maxBarThickness: 40
+            },
+            {
+              label: 'Total Expenditure', 
+              data: expenditureData,
+              backgroundColor: '#cc4400',
+              borderColor: '#cc4400',
+              borderWidth: 1,
+              maxBarThickness: 40
+            },
+            {
+              label: 'Net Effect',
+              data: netEffectData,
+              backgroundColor: function(context) {
+                const value = context.parsed.y;
+                return value >= 0 ? '#00aa00' : '#aa0000';
+              },
+              borderColor: function(context) {
+                const value = context.parsed.y;
+                return value >= 0 ? '#00aa00' : '#aa0000';
+              },
+              borderWidth: 1,
+              maxBarThickness: 40
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          layout: {
+            padding: {
+              left: 0,
+              right: 0,
+              top: 0,
+              bottom: 0
+            }
+          },
+          plugins: {
+            title: {
+              display: false
+            },
+            legend: {
+              display: true,
+              labels: {
+                color: '#fff',
+                font: {
+                  family: 'Poppins',
+                  size: 12
+                }
+              }
+            },
+            tooltip: {
+              backgroundColor: '#181818',
+              titleColor: '#ff8800',
+              bodyColor: '#fff',
+              borderColor: '#ff8800',
+              borderWidth: 1,
+              callbacks: {
+                label: function(context) {
+                  return `${context.dataset.label}: R${context.parsed.y.toFixed(1)}M`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: {
+                color: '#ff8800',
+                font: {
+                  family: 'Poppins',
+                  size: 11
+                }
+              },
+              grid: {
+                color: '#444'
+              }
+            },
+            y: {
+              ticks: {
+                color: '#fff',
+                font: {
+                  family: 'Poppins',
+                  size: 11
+                },
+                callback: function(value) {
+                  return 'R' + value.toFixed(1) + 'M';
+                }
+              },
+              grid: {
+                color: '#444'
+              }
+            }
+          },
+          elements: {
+            bar: {
+              borderRadius: 4
+            }
+          }
+        }
+      });
+    }
+
+    function calculate() {
+      const sezInput = document.getElementById("sez").value;
+      const expenditure = parseFloat(document.getElementById("expenditure").value);
+      
+      if (!sezInput) {
+        alert("Please select a SEZ");
+        return;
+      }
+      
+      const data = sezData[sezInput];
+      if (!data) {
+        alert(`SEZ "${sezInput}" data not found`);
+        return;
+      }
+
+      if (isNaN(expenditure)) {
+        alert("Please enter a valid expenditure amount");
+        return;
+      }
+
+      const income = expenditure * data.expenditureSEZincomeRatio;
+      const investment = expenditure * data.expenditureToInvestmentRatio; 
+      const jobs = expenditure * data.expenditureJobsRatio;
+      const cit = expenditure * data.expenditureToCITRatio;
+      const pit = expenditure * data.expenditureToPIT;
+      const rates = expenditure * data.expenditureTentantsRate;
+      const cost12r = expenditure * data.expenditure12RFiscalImpact;
+      const etichange = expenditure * data.expenditureToETIRatio;
+
+      const revenue = cit + pit + rates;
+      const totalexp = expenditure + cost12r + etichange;
+      const neteffect = revenue - totalexp;
+      
+      document.getElementById("income").textContent = formatCurrency(income);
+      document.getElementById("investment").textContent = formatCurrency(investment);
+      document.getElementById("jobs").textContent = jobs.toFixed(2).replace('.00', '');
+      document.getElementById("cit").textContent = formatCurrency(cit);
+      document.getElementById("pit").textContent = formatCurrency(pit);
+      document.getElementById("rates").textContent = formatCurrency(rates);
+      document.getElementById("revenue").textContent = formatCurrency(revenue);
+      document.getElementById("cost12r").textContent = formatCurrency(cost12r);
+      document.getElementById("etichange").textContent = formatCurrency(etichange);
+      document.getElementById("totalexp").textContent = formatCurrency(totalexp);
+      document.getElementById("neteffect").textContent = formatCurrency(neteffect);
+
+      // Show the combined chart
+      generateCombinedChart(revenue, totalexp, neteffect);
+      
+      document.getElementById("output").style.display = "block";
+      document.getElementById("chart").style.display = "block";
+    }
+    
+  </script>
+</body>
+</html>
