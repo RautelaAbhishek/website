@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SEZ Impact Calculator</title>
+  <title>Industrial Park Impact Calculator</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
@@ -198,9 +198,9 @@
     <div class="calculator-flex">
       <div class="top-row">
         <div class="inputs">
-          <label for="sez">Select SEZ</label>
+          <label for="sez">Select Industrial Park</label>
           <select id="sez">
-            <option value="">-- Select a SEZ --</option>
+            <option value="">-- Select a Industrial Park --</option>
             <!-- This will be populated dynamically from Google Sheets -->
           </select>
           <label for="expenditure">Expenditure Increase (R)</label>
@@ -208,8 +208,8 @@
           <button onclick="calculate()">Calculate Impact</button>
         </div>
         <div class="output" id="output" style="display:none">
-          <div><strong>SEZ Core Income:</strong> <span id="income"></span></div>
-          <div><strong>SEZ Investment:</strong> <span id="investment"></span></div>
+          <div><strong>Industrial Park Core Income:</strong> <span id="income"></span></div>
+          <div><strong>Industrial Park Investment:</strong> <span id="investment"></span></div>
           <div><strong>Jobs:</strong> <span id="jobs"></span></div>
           <div><strong>Corporate IT:</strong> <span id="cit"></span></div>
           <div><strong>Personal IT:</strong> <span id="pit"></span></div>
@@ -257,7 +257,7 @@
         
       } catch (error) {
         console.error('API failed:', error);
-        throw new Error(`Failed to load SEZ data: ${error.message}. Please ensure the server is running or deploy to Vercel.`);
+        throw new Error(`Failed to load Industrial Park data: ${error.message}. Please ensure the server is running or deploy to Vercel.`);
       }
     }
     
@@ -265,7 +265,7 @@
     function processSheetData(values) {
       sezData = {};
       const select = document.getElementById('sez');
-      select.innerHTML = '<option value="">-- Select a SEZ --</option>';
+      select.innerHTML = '<option value="">-- Select a Industrial Park --</option>';
       values.forEach((row) => {
         const sezName = row[0];
         if (sezName && sezName.trim()) {
@@ -296,7 +296,7 @@
         await fetchSheetData();
       } catch (error) {
         console.error('Failed to load sheet data:', error);
-        alert(`Failed to load SEZ data: ${error.message}`);
+        alert(`Failed to load Industrial Park data: ${error.message}`);
       }
     });
 
@@ -507,13 +507,13 @@
       const expenditure = parseFloat(document.getElementById("expenditure").value);
       
       if (!sezInput) {
-        alert("Please select a SEZ");
+        alert("Please select a Industrial Park");
         return;
       }
       
       const data = sezData[sezInput];
       if (!data) {
-        alert(`SEZ "${sezInput}" data not found`);
+        alert(`Industrial Park "${sezInput}" data not found`);
         return;
       }
 
