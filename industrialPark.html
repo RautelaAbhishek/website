@@ -235,8 +235,8 @@
       // Fetch data from secure API endpoint
     async function fetchSheetData() {
       try {
-        // First try: Call our secure API endpoint (works in production/Vercel)
-        const response = await fetch('/api/sheets');
+        // Call our industrial parks API endpoint
+        const response = await fetch('/api/industrial-parks');
         
         const contentType = response.headers.get('content-type');
         if (!contentType || !contentType.includes('application/json')) {
