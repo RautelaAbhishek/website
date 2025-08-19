@@ -28,7 +28,7 @@ export default async function handler(req, res) {
       });
     }
 
-    const RANGE = 'Sheet1!A2:X50';
+    const RANGE = 'Industrial Park Database!A2:X50';
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}?valueRenderOption=UNFORMATTED_VALUE&key=${API_KEY}`;
 
     const response = await fetch(url);
